@@ -1,0 +1,15 @@
+[project]
+name = "multi-langgraph"
+version = "0.1.0"
+description = "Aqui vamos a construir alguns exemplos de multi-agentes"
+readme = "README.md"
+authors = [
+    { name = "EddyGiusepe", email = "eddychirinos.unac@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "black>=25.12.0",
+]

@@ -4,6 +4,7 @@ Senior Data Scientist.: Dr. Eddy Giusepe Chirinos Isidro
 
 Script multi_agent_langgraph_swarm_and_crewai.py
 ================================================
+Link de estudo --> https://reference.langchain.com/python/langgraph/swarm/
 
 DESCRIPTION:
 ----------
@@ -38,11 +39,13 @@ DISADVANTAGES:
 RUN:
     uv run multi_agent_langgraph_swarm_and_crewai.py
 """
+import asyncio
 import os
 import sys
 from pathlib import Path
 from textwrap import dedent
 
+import psycopg
 from config_rag_azure import COLLECTION_NAME, rag_config
 from crewai_tools import RagTool
 from dotenv import find_dotenv, load_dotenv
@@ -50,8 +53,9 @@ from langchain.agents import create_agent
 from langchain_core.tools import tool
 from langchain_openai import AzureChatOpenAI
 from langchain_tavily import TavilySearch
-from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph_swarm import create_handoff_tool, create_swarm
+from psycopg.rows import dict_row
 
 sys.path.append(str(Path(__file__).parent.parent))
 from config.ansi_colors import BLUE, CYAN, GREEN, MAGENTA, RED, RESET, YELLOW
@@ -67,6 +71,7 @@ azure_openai_endpoint = os.environ["AZURE_OPENAI_ENDPOINT"]
 azure_apenai_api_version = os.environ["AZURE_OPENAI_API_VERSION"]
 azure_openai_deployment = os.environ["AZURE_OPENAI_DEPLOYMENT"]
 tavily_api_key = os.environ["TAVILY_API_KEY"]
+postgres_uri = os.environ["POSTGRES_URI"]
 
 # Path to the PDF of the curriculum (generic default name):
 # User must place their curriculum in the data/:
@@ -97,9 +102,11 @@ def load_rag_tool(
     # Create RagTool once (it will get_or_create the collection internally)
     rag_tool = RagTool(
         name="Professional Curriculum Knowledge Base",
-        description=dedent("""Knowledge base to answer questions about the professional
+        description=dedent(
+            """Knowledge base to answer questions about the professional
                               curriculum of the candidate.
-                           """),
+                           """
+        ),
         limit=limit,
         similarity_threshold=similarity_threshold,
         collection_name=collection_name,
@@ -264,19 +271,36 @@ search_agent = create_agent(
     name="SearchAgent",
 )
 
-checkpointer = InMemorySaver()
-
+# The workflow will be compiled inside the async main() function with the checkpointer:
 workflow = create_swarm(
     agents=[curriculum_vitae_agent, search_agent],
     default_active_agent="CurriculumVitaeAgent",
 )
 
-app = workflow.compile(checkpointer=checkpointer)
 
-config = {"configurable": {"thread_id": "1"}}
+async def main():
+    """Async main function - initializes connection, checkpointer and interactive loop"""
 
+    # Create asynchronous connection with PostgreSQL:
+    logger.info(f"{CYAN}🔄 Connecting to PostgreSQL...{RESET}")
+    conn = await psycopg.AsyncConnection.connect(
+        postgres_uri, autocommit=True, row_factory=dict_row
+    )
+    logger.info(f"{GREEN}✅ Connected to PostgreSQL!{RESET}")
 
-if __name__ == "__main__":
+    # Create asynchronous checkpointer:
+    checkpointer = AsyncPostgresSaver(conn)
+
+    # Initialize PostgreSQL tables (only the first time):
+    logger.info(f"{CYAN}🔄 Initializing PostgreSQL tables...{RESET}")
+    await checkpointer.setup()
+    logger.info(f"{GREEN}✅ Tables initialized!{RESET}")
+
+    # Compile the workflow with the checkpointer:
+    app = workflow.compile(checkpointer=checkpointer)
+
+    config = {"configurable": {"thread_id": "1"}}
+
     logger.info(
         f"{YELLOW}🤖 Multi-Agent System for Curriculum Analysis (RAG) and Web Search 🤖{RESET}"
     )
@@ -287,29 +311,41 @@ if __name__ == "__main__":
         "SearchAgent": f"{BLUE}🌐 SearchAgent (Web Search){RESET}",
     }
 
-    while True:
-        try:
-            question = input(f"{RED}💬 Your question: {RESET}").strip()
+    try:
+        while True:
+            try:
+                question = input(f"{RED}💬 Your question: {RESET}").strip()
 
-            if question.lower() in ["exit", "quit", "q"]:
-                logger.info(f"{RED}👋 Closing... See you later!{RESET}")
+                if question.lower() in ["exit", "quit", "q"]:
+                    logger.info(f"{RED}👋 Closing... See you later!{RESET}")
+                    break
+
+                if not question:
+                    logger.warning(f"{RED}⚠️  Please enter a valid question.{RESET}")
+                    continue
+
+                # Use ainvoke instead of invoke:
+                result = await app.ainvoke(
+                    {"messages": [{"role": "user", "content": question}]}, config
+                )
+                message = result["messages"][-1]
+                agent = getattr(message, "name", "Unknown")
+
+                print(agent_display.get(agent, f"{YELLOW}🤖 {agent}{RESET}"))
+                print(f"{GREEN}💬 {message.content.strip()}{RESET}\n")
+
+            except KeyboardInterrupt:
+                logger.info(f"{GREEN}👋 Closing... See you later!{RESET}")
                 break
+            except Exception as e:
+                logger.error(f"{RED}❌ Error processing: {e}. Try again.{RESET}")
+    finally:
+        # Close connection when exiting:
+        logger.info(f"{CYAN}🔄 Closing connection with PostgreSQL...{RESET}")
+        await conn.close()
+        logger.info(f"{GREEN}✅ Connection closed!{RESET}")
 
-            if not question:
-                logger.warning(f"{RED}⚠️  Please enter a valid question.{RESET}")
-                continue
 
-            result = app.invoke(
-                {"messages": [{"role": "user", "content": question}]}, config
-            )
-            message = result["messages"][-1]
-            agent = getattr(message, "name", "Unknown")
-
-            print(agent_display.get(agent, f"{YELLOW}🤖 {agent}{RESET}"))
-            print(f"{GREEN}💬 {message.content.strip()}{RESET}\n")
-
-        except KeyboardInterrupt:
-            logger.info(f"{GREEN}👋 Closing... See you later!{RESET}")
-            break
-        except Exception as e:
-            logger.error(f"{RED}❌ Error processing: {e}. Try again.{RESET}")
+if __name__ == "__main__":
+    # Run main async loop:
+    asyncio.run(main())

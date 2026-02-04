@@ -5,9 +5,10 @@
 Over the past year, the discussion around multi-agent systems has grown rapidly, and for good reason. As AI matures, building applications with a single intelligent agent often proves insufficient. Instead, orchestrating multiple agents, each with specific roles and responsibilities, leads to more adaptable and reliable solutions.
 
 
+![](https://i.ytimg.com/vi/cUfLrn3TM3M/maxresdefault.jpg)
 
 
-
+![](https://innovationlab.fetch.ai/resources/img/langgraph_agent.png)
 
 
 

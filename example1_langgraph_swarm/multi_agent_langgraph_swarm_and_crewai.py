@@ -130,7 +130,7 @@ def load_rag_tool(
             logger.info(f"{CYAN}📋 Collection is empty. Adding data...{RESET}")
     except Exception as e:
         logger.warning(
-            f"{YELLOW}⚠️  Could not check collection: {e}. Will add data to be safe.{RESET}"
+            f"{YELLOW}⚠️ Could not check collection: {e}. Will add data to be safe.{RESET}"
         )
 
     # Add data only if collection is empty or check failed
@@ -161,7 +161,6 @@ def cv_knowledge_base(query: str) -> str:
     return _rag_tool.run(query)
 
 
-# Web search tool:
 web_search_tool = TavilySearch(
     max_results=5,  # Increase number of results
     search_depth="advanced",  # Use advanced search
@@ -170,7 +169,6 @@ web_search_tool = TavilySearch(
     include_images=False,
 )
 
-# LLM model:
 model = AzureChatOpenAI(
     api_key=azure_openai_api_key,
     api_version=azure_apenai_api_version,
@@ -178,7 +176,7 @@ model = AzureChatOpenAI(
     azure_deployment=azure_openai_deployment,
 )
 
-# Curriculum analysis agent:
+
 curriculum_vitae_agent = create_agent(
     model=model,
     tools=[
@@ -235,7 +233,6 @@ curriculum_vitae_agent = create_agent(
     name="CurriculumVitaeAgent",
 )
 
-# Web search agent:
 search_agent = create_agent(
     model=model,
     tools=[

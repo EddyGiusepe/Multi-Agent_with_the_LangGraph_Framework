@@ -2,11 +2,11 @@
 """
 Senior Data Scientist.: Dr. Eddy Giusepe Chirinos Isidro
 
-Module api.py
+Script api.py
 =============
-FastAPI application for the multi-agent system.
+FastAPI Application for the multi-agent system.
 
-Provides REST API endpoints for:
+Provides REST API Endpoints for:
     - POST /chat: Process questions through the multi-agent system
     - GET /health: Health check endpoint
 

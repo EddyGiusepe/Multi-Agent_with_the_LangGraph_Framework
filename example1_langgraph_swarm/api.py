@@ -34,6 +34,7 @@ from agents import create_app
 from database import get_checkpointer
 from service import ChatResponse, process_question
 
+from config.ansi_colors import GREEN, RED, RESET, YELLOW
 from config.logging_config import get_logger, setup_logging
 from config.settings import POSTGRES_URI
 
@@ -42,9 +43,6 @@ setup_logging()
 logger = get_logger(__name__)
 
 
-# =======================
-# Request/Response Models
-# =======================
 class ChatRequest(BaseModel):
     """Request model for the /chat endpoint."""
 
@@ -69,9 +67,6 @@ class HealthResponse(BaseModel):
     message: str = Field(description="Additional health information")
 
 
-# ===========================================
-# Application State (initialized in lifespan)
-# ===========================================
 class AppState:
     """Container for application state to avoid global variables."""
 
@@ -97,26 +92,23 @@ async def lifespan(app: FastAPI):
     On shutdown:
         - Close PostgreSQL connection
     """
-    logger.info("Starting API - connecting to PostgreSQL...")
+    logger.info(f"{GREEN}Starting API - connecting to PostgreSQL...{RESET}")
 
     # Enter the context manager manually to keep connection open
     app_state.checkpointer_cm = get_checkpointer(POSTGRES_URI)
     checkpointer = await app_state.checkpointer_cm.__aenter__()
     app_state.app_instance = create_app(checkpointer)
 
-    logger.info("API ready - workflow compiled")
+    logger.info(f"{YELLOW}API ready - workflow compiled{RESET}")
 
     yield
 
     # Cleanup on shutdown:
-    logger.info("Shutting down API...")
+    logger.info(f"{RED}Shutting down API...{RESET}")
     await app_state.checkpointer_cm.__aexit__(None, None, None)
-    logger.info("API shutdown complete")
+    logger.info(f"{RED}API shutdown complete{RESET}")
 
 
-# ===================
-# FastAPI Application
-# ===================
 app = FastAPI(
     title="Multi-Agent Curriculum API",
     description="""
@@ -157,7 +149,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
         )
         return response
     except Exception as e:
-        logger.error(f"Error processing question: {e}")
+        logger.error(f"{RED}Error processing question: {e}{RESET}")
         raise HTTPException(
             status_code=500,
             detail=f"Error processing question: {e!s}",
@@ -181,3 +173,8 @@ async def health() -> HealthResponse:
         status="healthy",
         message="API is running and workflow is ready",
     )
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)

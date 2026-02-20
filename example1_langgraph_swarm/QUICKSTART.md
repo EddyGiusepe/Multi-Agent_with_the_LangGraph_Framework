@@ -28,6 +28,8 @@ This is a multi-agent system with LangGraph Swarm, RAG (CrewAI) and web search (
 
 3. **PDF of the curriculum** in `example1_langgraph_swarm/data/Data_Science_Eddy_en.pdf`
 
+It could be any other resume. 
+
 ## <font color="gree">``Option 1:`` CLI (Interactive Terminal)</font>
 
 ```bash

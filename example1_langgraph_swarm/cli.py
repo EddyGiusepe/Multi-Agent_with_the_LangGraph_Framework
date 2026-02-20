@@ -31,18 +31,12 @@ setup_logging()
 logger = get_logger(__name__)
 
 
-# =====================
-# Display Configuration
-# =====================
 AGENT_DISPLAY = {
     "CurriculumVitaeAgent": f"{MAGENTA}📄 CurriculumVitaeAgent (Curriculum Analysis){RESET}",
     "SearchAgent": f"{BLUE}🌐 SearchAgent (Web Search){RESET}",
 }
 
 
-# ================
-# Interactive Loop
-# ================
 async def run_interactive_loop(app, thread_id: str = "cli-session") -> None:
     """
     Run the interactive REPL loop.
@@ -82,9 +76,6 @@ async def run_interactive_loop(app, thread_id: str = "cli-session") -> None:
             logger.error(f"{RED}❌ Error processing: {e}. Try again.{RESET}")
 
 
-# ================
-# Main Entry Point
-# ================
 async def main() -> None:
     """
     Main entry point for the CLI.

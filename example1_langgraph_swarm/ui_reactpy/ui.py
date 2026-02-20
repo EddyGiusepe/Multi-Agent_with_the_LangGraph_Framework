@@ -12,6 +12,8 @@ Prerequisites:
 1. PostgreSQL running (docker-compose up -d)
 2. API Backend running on port 8000:
    uvicorn example1_langgraph_swarm.api:app --reload --port 8000
+   or
+   uvicorn api:app --reload --port 8000
 
 Run UI:
 =======
@@ -19,7 +21,7 @@ uv run example1_langgraph_swarm/ui_reactpy/ui.py
 
 Access:
 =======
-UI: http://localhost:8080
+UI: http://localhost:8080 (frontend)
 API: http://localhost:8000 (backend)
 """
 
@@ -515,7 +517,7 @@ def welcome_message():
                 html.div({"style": agent_title_style}, "📄 CV Agent"),
                 html.div(
                     {"style": agent_desc_style},
-                    "Analyzes professional curriculum, skills, experience, and education",
+                    "Analyzes professional curriculum, skills, experience and education",
                 ),
             ),
             html.div(
@@ -523,7 +525,7 @@ def welcome_message():
                 html.div({"style": agent_title_style}, "🔍 Search Agent"),
                 html.div(
                     {"style": agent_desc_style},
-                    "Searches the web for current information, news, and technologies",
+                    "Searches the web for current information, news and technologies",
                 ),
             ),
         ),

@@ -20,8 +20,10 @@ from psycopg.rows import dict_row
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from config.logging_config import get_logger
+from config.logging_config import get_logger, setup_logging
 
+# Initialize logging:
+setup_logging()
 logger = get_logger(__name__)
 
 

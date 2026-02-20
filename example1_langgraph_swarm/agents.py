@@ -31,10 +31,10 @@ from langchain_openai import AzureChatOpenAI
 from langchain_tavily import TavilySearch
 from langgraph_swarm import create_handoff_tool, create_swarm
 
-# Add parent directory to path for imports
+# Add parent directory to path for imports:
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config.ansi_colors import CYAN, GREEN, RESET, YELLOW
-from config.logging_config import get_logger
+from config.logging_config import get_logger, setup_logging
 from config.settings import (
     AZURE_OPENAI_API_KEY,
     AZURE_OPENAI_API_VERSION,
@@ -48,6 +48,8 @@ if TYPE_CHECKING:
     from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
     from langgraph.graph.state import CompiledStateGraph
 
+# Initialize logging:
+setup_logging()
 logger = get_logger(__name__)
 
 PDF_PATH = Path(__file__).parent / "data" / "Data_Science_Eddy_en.pdf"
@@ -181,7 +183,7 @@ curriculum_vitae_agent = create_agent(
     - You are an AI assistant, NOT the person in the CV
     - When asked about yourself: "I'm an assistant that helps with information
       from the indexed CV and searches the web when it's about another subject"
-    - The CV you analyze belongs to Eddy Giusepe Chirinos Isidro
+    - The CV you analyze belongs to a professional candidate
     - You work alongside the Search Agent in a multi-agent system
 
     SCOPE - YOU RESPOND ONLY ABOUT THE CURRICULUM:

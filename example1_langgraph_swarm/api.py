@@ -15,6 +15,9 @@ using FastAPI's lifespan context manager.
 
 Run with:
     uvicorn example1_langgraph_swarm.api:app --reload --port 8000
+
+or inside from directory:
+    uvicorn api:app --reload --port 8000
 """
 import sys
 from contextlib import asynccontextmanager
@@ -24,16 +27,18 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-# Add parent directory to path for imports
+# Add parent directory to path for imports:
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agents import create_app
 from database import get_checkpointer
 from service import ChatResponse, process_question
 
-from config.logging_config import get_logger
+from config.logging_config import get_logger, setup_logging
 from config.settings import POSTGRES_URI
 
+# Initialize logging:
+setup_logging()
 logger = get_logger(__name__)
 
 

@@ -173,7 +173,7 @@ def chat_message(role: str, content: str, agent: str | None = None):
         "color": "#ffffff",
     }
 
-    # Determine role text and agent icon
+    # Determine role text and agent icon:
     if is_user:
         role_text = "You"
         agent_badge = None
@@ -717,29 +717,24 @@ uvicorn example1_langgraph_swarm.api:app --reload --port 8000
     version="1.0.0",
 )
 
-# Configure ReactPy UI
+# Configure ReactPy UI:
 configure(app, chat_app)
 
 
 if __name__ == "__main__":
-    print("=" * 70)
     print("🎨 Multi-Agent UI - Frontend")
-    print("=" * 70)
     print("💬 Interactive chat interface for multi-agent system")
     print("📄 CV Agent badge for curriculum questions")
     print("🔍 Search Agent badge for web searches")
-    print("=" * 70)
     print("⚠️  IMPORTANT: Backend API must be running!")
     print("   Start API with:")
     print("   uvicorn example1_langgraph_swarm.api:app --reload --port 8000")
-    print("=" * 70)
     print("🎨 UI Access: http://localhost:8080")
     print("🔌 API Backend: http://localhost:8000 (must be running)")
     print("📚 API Docs: http://localhost:8000/docs")
-    print("=" * 70)
     print("🛑 Press Ctrl+C to stop\n")
 
-    # Run UI on port 8080
+    # Run UI on port 8080:
     uvicorn.run(
         "ui:app",
         host="0.0.0.0",

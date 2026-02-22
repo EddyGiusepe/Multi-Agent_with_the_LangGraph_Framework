@@ -537,7 +537,7 @@ def welcome_message():
             {"style": suggestions_style},
             html.div(
                 {"style": suggestion_style},
-                "💡 Example: What are the technical skills of this professional?",
+                "💡 Example: In which country is Machu Picchu located, and what does that name mean?",
             ),
             html.div(
                 {"style": suggestion_style},

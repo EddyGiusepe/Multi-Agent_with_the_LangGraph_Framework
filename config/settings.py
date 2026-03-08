@@ -46,3 +46,8 @@ TAVILY_API_KEY = os.environ["TAVILY_API_KEY"]
 # PostgreSQL (LangGraph checkpointer)
 # ===================================
 POSTGRES_URI = os.environ["POSTGRES_URI"]
+
+# Opik (LLM Observability)
+OPIK_API_KEY=os.environ.get("OPIK_API_KEY")
+OPIK_WORKSPACE=os.environ.get("OPIK_WORKSPACE")
+OPIK_PROJECT_NAME=os.environ.get("OPIK_PROJECT_NAME")

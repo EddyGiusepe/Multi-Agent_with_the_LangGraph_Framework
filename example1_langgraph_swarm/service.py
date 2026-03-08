@@ -16,6 +16,7 @@ Key components:
 """
 from typing import TYPE_CHECKING
 
+from opik import track
 from pydantic import BaseModel, Field
 
 if TYPE_CHECKING:
@@ -39,7 +40,7 @@ class ChatResponse(BaseModel):
     content: str = Field(description="Response content from the agent")
     thread_id: str = Field(description="Thread/session identifier")
 
-
+@track(name="process_question")
 async def process_question(
     app: "CompiledStateGraph",
     question: str,

@@ -30,6 +30,7 @@ from langchain_core.tools import tool
 from langchain_openai import AzureChatOpenAI
 from langchain_tavily import TavilySearch
 from langgraph_swarm import create_handoff_tool, create_swarm
+from opik.integrations.langchain import OpikTracer, track_langgraph
 
 # Add parent directory to path for imports:
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -278,4 +279,18 @@ def create_app(checkpointer: "AsyncPostgresSaver") -> "CompiledStateGraph":
     Returns:
         CompiledStateGraph ready to process messages
     """
-    return workflow.compile(checkpointer=checkpointer)
+    app = workflow.compile(checkpointer=checkpointer)
+
+    # Wrapping with Opik for observability:
+    opik_tracer = OpikTracer(
+    tags=["langgraph_swarm", "multi-agent"],
+    metadata={
+        "model": AZURE_OPENAI_DEPLOYMENT,
+        "rag_collection": COLLECTION_NAME,
+        "rag_similarity_threshold": 0.50,
+        "search_depth": "advanced",
+        "version": "1.0.0",
+    },
+)
+    app = track_langgraph(app, opik_tracer=opik_tracer)
+    return app

@@ -11,7 +11,4 @@ Over the past year, the discussion around multi-agent systems has grown rapidly,
 ![](https://innovationlab.fetch.ai/resources/img/langgraph_agent.png)
 
 
-
-
-
 Thank God!
